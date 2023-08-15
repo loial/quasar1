@@ -12,7 +12,7 @@
         />
 
         <q-toolbar-title>
-          Quasar App
+          Catalog Scanner
         </q-toolbar-title>
 
         <div>Quasar v{{ $q.version }}</div>
@@ -25,8 +25,15 @@
       bordered
     >
       <q-list>
+
+        <InternalLink
+          v-for="link in internalLinks"
+          :key="link.title"
+          v-bind="link"
+        />
         <q-item-label
           header
+          v-if="essentialLinks.count"
         >
           Essential Links
         </q-item-label>
@@ -48,63 +55,40 @@
 <script>
 import { defineComponent, ref } from 'vue'
 import EssentialLink from 'components/EssentialLink.vue'
+import InternalLink from 'components/InternalLink.vue'
+
+
+const pageList = [
+  {
+    title: 'Main',
+    caption: '',
+    icon: 'home',
+    link: '/'
+  },
+  {
+    title: 'Scan',
+    caption: 'Scan barcodes',
+    icon: 'barcode_reader',
+    link: 'scan'
+  }
+]
 
 const linksList = [
-  {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev'
-  },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
-  },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev'
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev'
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev'
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev'
-  }
 ]
 
 export default defineComponent({
   name: 'MainLayout',
 
   components: {
-    EssentialLink
+    EssentialLink,
+    InternalLink
   },
 
   setup () {
     const leftDrawerOpen = ref(false)
 
     return {
+      internalLinks: pageList,
       essentialLinks: linksList,
       leftDrawerOpen,
       toggleLeftDrawer () {

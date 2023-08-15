@@ -14,7 +14,11 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
+    "html5-qrcode": "^2.3.8",
+    "mitt": "^3.0.0",
+    "mount-vue-component": "^0.10.2",
     "quasar": "^2.6.0",
+    "vite-plugin-eruda": "^1.0.1",
     "vue": "^3.0.0",
     "vue-router": "^4.0.0"
   },
