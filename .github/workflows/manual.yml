@@ -23,7 +23,7 @@ jobs:
   # This workflow contains a single job called "greet"
   setup:
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -39,39 +39,39 @@ jobs:
       run: npm install
 
     - name: Setup iOS build
-      run: node_modules/.bin/quasar dev --mode cordova --target ios
-    - name: Create cordova source
+      #   run: node_modules/.bin/quasar dev --mode cordova --target ios
+      # -   name: Create cordova source
       run: node_modules/.bin/quasar build --mode cordova --target ios --skip-pkg
-    - name: create cordova ios tar package
-      run: tar -czf src-cordova-ios.tar.gz /app/src-cordova/*
+      # - name: create cordova ios tar package
+      #   run: tar -czf src-cordova-ios.tar.gz /app/src-cordova/*
 
-    - name: upload cordova package
-      uses: actions/upload-artifact@v3
-      with:
-        name: src-cordova-ios
-        path: src-cordova-ios.tar.gz
+      # - name: upload cordova package
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: src-cordova-ios
+      #     path: src-cordova-ios.tar.gz
 
 
-  iOS-build:
-    runs-on: macos-latest
-    needs: setup
-    steps:
-      - name: download cordova package
-        uses: actions/download-artifact@v3
-        with:
-          name: src-cordova-ios
-          path: src-cordova.ios.tar.gz
-      - name: unpack cordova package
-        run: tar -zxf src-cordova-ios.tar.gz
+      # iOS-build:
+      #   runs-on: macos-latest
+      #   needs: setup
+      #   steps:
+      #     - name: download cordova package
+      #       uses: actions/download-artifact@v3
+      #       with:
+      #         name: src-cordova-ios
+      #         path: src-cordova.ios.tar.gz
+      #     - name: unpack cordova package
+      #       run: tar -zxf src-cordova-ios.tar.gz
 
-      - name: Sparkfabrik
-        uses: sparkfabrik/ios-build-action@v2.3.0
-        with:
-            configuration: Release
-            export-method: package
-            workspace-path: ${{ secrets.WORKSPACE_PATH }}
-            project-path: ${{ secrets.PROJECT_PATH }}
-            output-path: build-${{ github.sha }}.ipa
-            team-id: quasar1
-            team-name: Sletteng
-            ios-app-id: org.sletteng.quasar1
+      #     - name: Sparkfabrik
+      #       uses: sparkfabrik/ios-build-action@v2.3.0
+      #       with:
+      #           configuration: Release
+      #           export-method: package
+      #           workspace-path: ${{ secrets.WORKSPACE_PATH }}
+      #           project-path: ${{ secrets.PROJECT_PATH }}
+      #           output-path: build-${{ github.sha }}.ipa
+      #           team-id: quasar1
+      #           team-name: Sletteng
+      #           ios-app-id: org.sletteng.quasar1
