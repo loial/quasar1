@@ -30,3 +30,19 @@ jobs:
     # Runs a single command using the runners shell
     - name: Send greeting
       run: echo "Hello ${{ inputs.name }}"
+
+
+  iOS-build:
+    runs-on: macos-latest
+    steps:
+      - name: Sparkfabrik
+        uses: sparkfabrik/ios-build-action@v2.3.0
+        with:
+            configuration: Release
+            export-method: package
+            workspace-path: ${{ secrets.WORKSPACE_PATH }}
+            project-path: ${{ secrets.PROJECT_PATH }}
+            output-path: build-${{ github.sha }}.ipa
+            team-id: quasar1
+            team-name: Sletteng
+            ios-app-id: org.sletteng.quasar1
