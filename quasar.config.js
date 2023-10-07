@@ -7,12 +7,11 @@
 
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
-
+const packageInfo = require('./package.json')
 
 const { configure } = require('quasar/wrappers');
 
-
-module.exports = configure(function (/* ctx */) {
+module.exports = configure(function ( ctx ) {
   return {
     eslint: {
       // fix: true,
@@ -69,7 +68,16 @@ module.exports = configure(function (/* ctx */) {
 
       // publicPath: '/',
       // analyze: true,
-      // env: {},
+      env: {
+        appinfo: {
+                    name: packageInfo.name,
+                    version: packageInfo.version,
+                    productName: packageInfo.productName,
+                    description: packageInfo.description,
+                    projectUrl: packageInfo.projectUrl,
+                    previewUrl: packageInfo.previewUrl,
+                },
+      },
       // rawDefine: {}
       // ignorePublicFolder: true,
       // minify: false,
@@ -88,7 +96,11 @@ module.exports = configure(function (/* ctx */) {
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
     devServer: {
       // https: true
-      open: true // opens browser window automatically
+      open: false, // opens browser window automatically
+      hmr: {
+        protocol: 'wss',
+        clientPort: 443
+      }
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework

@@ -2,7 +2,7 @@
   <q-page class="flex flex-center">
     <QrcodeScanner v-if="!result"
         :qrbox="{width:400,height:200}"
-        :fps="2"
+        :fps="100"
         style="width: 500px;"
         @result="setResult"
 
