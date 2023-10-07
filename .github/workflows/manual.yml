@@ -7,34 +7,63 @@ name: Manual workflow
 on:
   workflow_dispatch:
     # Inputs the workflow accepts.
-    inputs:
-      name:
-        # Friendly description to be shown in the UI instead of 'name'
-        description: 'Person to greet'
-        # Default value if no value is explicitly provided
-        default: 'World'
-        # Input has to be provided for the workflow to run
-        required: true
-        # The data type of the input
-        type: string
+    # inputs:
+    #   name:
+    #     # Friendly description to be shown in the UI instead of 'name'
+    #     description: 'Person to greet'
+    #     # Default value if no value is explicitly provided
+    #     default: 'World'
+    #     # Input has to be provided for the workflow to run
+    #     required: true
+    #     # The data type of the input
+    #     type: string
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "greet"
-  greet:
+  setup:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Runs a single command using the runners shell
-    - name: Send greeting
-      run: echo "Hello ${{ inputs.name }}"
+    - uses: actions/checkout@v3
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16.x
+        cache: 'npm'
+    - name: Setup Cordova
+      run: npm install -g cordova
+    - name: Install dependencies
+      run: npm install
+
+    - name: Setup iOS build
+      run: node_modules/.bin/quasar dev --mode cordova --target ios
+    - name: Create cordova source
+      run: node_modules/.bin/quasar build --mode cordova --target ios --skip-pkg
+    - name: create cordova ios tar package
+      run: tar -czf src-cordova-ios.tar.gz /app/src-cordova/*
+
+    - name: upload cordova package
+      uses: actions/upload-artifact@v3
+      with:
+        name: src-cordova-ios
+        path: src-cordova-ios.tar.gz
 
 
   iOS-build:
     runs-on: macos-latest
+    needs: setup
     steps:
+      - name: download cordova package
+        uses: actions/download-artifact@v3
+        with:
+          name: src-cordova-ios
+          path: src-cordova.ios.tar.gz
+      - name: unpack cordova package
+        run: tar -zxf src-cordova-ios.tar.gz
+
       - name: Sparkfabrik
         uses: sparkfabrik/ios-build-action@v2.3.0
         with:
