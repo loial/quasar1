@@ -41,10 +41,24 @@ jobs:
     - name: Setup iOS build
       #   run: node_modules/.bin/quasar dev --mode cordova --target ios
       # -   name: Create cordova source
-      run: node_modules/.bin/quasar build --mode cordova --target ios -- --device
+      run: >
+        node_modules/.bin/quasar build --mode cordova --target ios
+        --
+        --device
+        --codeSignIdentity="iPhone Developer"
+        --developmentTeam=FG35JLLMXX4A
+        --packageType=development
+        --buildFlag="CODE_SIGN_IDENTITY=''"
+        --buildFlag="CODE_SIGN_ENTITLEMENTS=''"
+        --buildFlag="CODE_SIGNING_REQUIRED=NO"
+        --buildFlag="CODE_SIGNING_ALLOWED=NO"
+        # --automaticProvisioning=true
 
     - name: List result
-      run: find dist
+      run: >
+        find dist ;
+        find . -name '*.ipa'
+
       # - name: create cordova ios tar package
       #   run: tar -czf src-cordova-ios.tar.gz /app/src-cordova/*
 
