@@ -41,7 +41,10 @@ jobs:
     - name: Setup iOS build
       #   run: node_modules/.bin/quasar dev --mode cordova --target ios
       # -   name: Create cordova source
-      run: node_modules/.bin/quasar build --mode cordova --target ios --skip-pkg
+      run: node_modules/.bin/quasar build --mode cordova --target ios -- --device
+
+    - name: List result
+      run: find dist
       # - name: create cordova ios tar package
       #   run: tar -czf src-cordova-ios.tar.gz /app/src-cordova/*
 
