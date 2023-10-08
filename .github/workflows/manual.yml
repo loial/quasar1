@@ -33,7 +33,11 @@ jobs:
       with:
         node-version: 16.x
         cache: 'npm'
-    - name: Setup Capacitor
+    - name: Install global tool Pnpm
+      run: npm install -g pnpm
+    - name: Install global tool Quasar
+      run: npm install -g @quasar/cli
+    - name: Install global tool Capacitor
       run: npm install -g capacitor
     - name: Install dependencies
       run: npm install
@@ -42,55 +46,131 @@ jobs:
       #   run: node_modules/.bin/quasar dev --mode cordova --target ios
       # -   name: Create cordova source
       run: >
-        node_modules/.bin/quasar build --mode capacitor --target ios
+        node_modules/.bin/quasar build --mode capacitor --target ios --ide
         || true
-        # --
-        # --device
-        # --codeSignIdentity="iPhone Developer"
-        # --developmentTeam=FG35JLLMXX4A
-        # --packageType=development
-        # --buildFlag="CODE_SIGN_IDENTITY=''"
-        # --buildFlag="CODE_SIGN_ENTITLEMENTS=''"
-        # --buildFlag="CODE_SIGNING_REQUIRED=NO"
-        # --buildFlag="CODE_SIGNING_ALLOWED=NO"
-        # --automaticProvisioning=true
+
+    - name: List iOS build schemes
+      run: >
+        cd src-capacitor/ios/App &&
+        xcodebuild
+        -list
+        && true
+
+    # - name: Generate ExportOptions.plist
+    #   uses: ./.github/workflows/ExportOptionsPlist.yml
+    #   with:
+    #     method: archive
+    #     output: src-capacitor/ios/ExportOptionsPlist.yml
+
+    # - name: Process secrets
+    #   env:
+    #     IOS_DEVCERT_FREE_P12_BASE64: ${{ secrets.IOS_DEVCERT_FREE_P12_BASE64 }}
+    #     IOS_DEVCERT_FREE_PASSWORD: ${{secrets.IOS_DEVCERT_FREE_PASSWORD }}
+    #     IOS_MOBILEPROVISIONING_BASE64: ${{ secrets.IOS_MOBILEPROVISIONING_BASE64 }}
+    #     IOS_DEVELOPERTEAMID: ${{ secrets.IOS_DEVELOPERTEAMID }}
+    #     IOS_DEVELOPERTEAMNAME: ${{ secrets.IOS_DEVELOPERTEAMNAME }}
+    #   run: >
+    #     echo -n "$IOS_DEVCERT_FREE_P12_BASE64" | base64 --decode -o cert.p12
+    #     echo -n "$IOS_MOBILEPROVISIONING_BASE64" | base64 --decode -o App.mobileprovisioning
+
+    # - name: Build archive
+    #   run: >
+    #     cd src-capacitor/ios/App &&
+    #     xcodebuild build -scheme App -sdk iphoneos -destination generic/platform=iOS
+
+    # - name: Build archive
+    #   run: >
+    #     cd src-capacitor/ios/App &&
+    #     xcodebuild -exportArchive -archivePath ../App.xcarchive -exportPath ../build -exportOptionsPlist ../ExportOptions.plist archive
+
+    - name: Build iOS archive
+      run: >
+        xcrun xcodebuild
+        -workspace src-capacitor/ios/App/App.xcworkspace
+        -scheme App
+        -configuration release
+        -archivePath dist/capacitor/ios/App.xcarchive
+        archive
+        CODE_SIGN_IDENTITY=''
+        CODE_SIGN_ENTITLEMENTS=''
+        CODE_SIGNING_REQUIRED=NO
+        CODE_SIGNING_ALLOWED=NO
+    #     -derivedDataPath dist/capacitor/ios
+    #     # || true # Continue even if build fails
+    #     # -automaticProvisioning=true
+    #     # -device
 
     - name: List result
       run: >
-        find dist ;
-        find . -name '*.xcarchive' ;
-        find . -name '*.ipa'
+        find dist/capacitor/ios/App.xcarchive
+      #( find dist || true ) &&
+      # ( find . -name '*.xcarchive' || true ) &&
+      # ( find . -name '*.ipa' )
+      #
+    - name: Create unsigned IPA
+      run: >
+        cd dist/capacitor/ios &&
+        mkdir -p Payload &&
+        cp -r App.xcarchive/Products/Applications/App.app Payload/ &&
+        zip -r App.ipa Payload/
 
-      # - name: create cordova ios tar package
-      #   run: tar -czf src-cordova-ios.tar.gz /app/src-cordova/*
-
-      # - name: upload cordova package
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: src-cordova-ios
-      #     path: src-cordova-ios.tar.gz
+    - name: Upload IPA
+      uses: actions/upload-artifact@v3
+      with:
+        name: ipa
+        path: dist/capacitor/ios/App.ipa
 
 
-      # iOS-build:
-      #   runs-on: macos-latest
-      #   needs: setup
-      #   steps:
-      #     - name: download cordova package
-      #       uses: actions/download-artifact@v3
-      #       with:
-      #         name: src-cordova-ios
-      #         path: src-cordova.ios.tar.gz
-      #     - name: unpack cordova package
-      #       run: tar -zxf src-cordova-ios.tar.gz
+    # - name: Generate ExportOptions.plist
+    #   run: >
+    #     defaults write $(pwd)/dist/capacitor/ios/ExportOptions method development
 
-      #     - name: Sparkfabrik
-      #       uses: sparkfabrik/ios-build-action@v2.3.0
-      #       with:
-      #           configuration: Release
-      #           export-method: package
-      #           workspace-path: ${{ secrets.WORKSPACE_PATH }}
-      #           project-path: ${{ secrets.PROJECT_PATH }}
-      #           output-path: build-${{ github.sha }}.ipa
-      #           team-id: quasar1
-      #           team-name: Sletteng
-      #           ios-app-id: org.sletteng.quasar1
+    # - name: Export iOS archive
+    #   run: >
+    #     xcrun xcodebuild
+    #     -exportArchive
+    #     -archivePath dist/capacitor/ios/App.xcarchive
+    #     -exportOptionsPlist dist/capacitor/ios/ExportOptions.plist
+    #     -exportPath dist/capacitor/ios/
+    #     CODE_SIGN_IDENTITY=''
+    #     CODE_SIGN_ENTITLEMENTS=''
+    #     CODE_SIGNING_REQUIRED=NO
+    #     CODE_SIGNING_ALLOWED=NO
+    #     AD_HOC_CODE_SIGNING_ALLOWED=YES
+
+    #     # --developmentTeam={{ secrets.IOS_DEVTEAMID }}
+    #     # --packageType=development
+    #     # --buildFlag="CODE_SIGN_IDENTITY=''"
+    #     # --buildFlag="CODE_SIGN_ENTITLEMENTS=''"
+    #     # --buildFlag="CODE_SIGNING_REQUIRED=NO"
+    #     # --buildFlag="CODE_SIGNING_ALLOWED=NO"
+    #     # --automaticProvisioning=true
+
+
+    # - name: create cordova ios tar package
+    #   run: tar -czf src-cordova-ios.tar.gz /app/src-cordova/*
+
+    # iOS-build:
+    #   runs-on: macos-latest
+    #   needs: setup
+    #   steps:
+    #     - name: download cordova package
+    #       uses: actions/download-artifact@v3
+    #       with:
+    #         name: src-cordova-ios
+    #         path: src-cordova.ios.tar.gz
+    #     - name: unpack cordova package
+    #       run: tar -zxf src-cordova-ios.tar.gz
+
+    # - name: Sparkfabrik
+    #   uses: sparkfabrik/ios-build-action@v2.3.0
+    #   with:
+    #       configuration: Release
+    #       export-method: package
+    #       workspace-path: src-capacitor/ios/App
+    #       project-path: src-capacitor/ios/App
+    #       output-path: build-${{ github.sha }}.ipa
+    #       team-id: ${{ secrets.IOS_DEVELOPERTEAMID }}
+    #       team-name: ${{ secrets.IOS_DEVELOPERTEAMNAME }}
+    #       ios-app-id: org.sletteng.app.quasar1
+
