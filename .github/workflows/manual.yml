@@ -1,0 +1,96 @@
+# This is a basic workflow that is manually triggered
+
+name: Manual workflow
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on:
+  workflow_dispatch:
+    # Inputs the workflow accepts.
+    # inputs:
+    #   name:
+    #     # Friendly description to be shown in the UI instead of 'name'
+    #     description: 'Person to greet'
+    #     # Default value if no value is explicitly provided
+    #     default: 'World'
+    #     # Input has to be provided for the workflow to run
+    #     required: true
+    #     # The data type of the input
+    #     type: string
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "greet"
+  setup:
+    # The type of runner that the job will run on
+    runs-on: macos-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16.x
+        cache: 'npm'
+    - name: Setup Capacitor
+      run: npm install -g capacitor
+    - name: Install dependencies
+      run: npm install
+
+    - name: Setup iOS build
+      #   run: node_modules/.bin/quasar dev --mode cordova --target ios
+      # -   name: Create cordova source
+      run: >
+        node_modules/.bin/quasar build --mode capacitor --target ios
+        || true
+        # --
+        # --device
+        # --codeSignIdentity="iPhone Developer"
+        # --developmentTeam=FG35JLLMXX4A
+        # --packageType=development
+        # --buildFlag="CODE_SIGN_IDENTITY=''"
+        # --buildFlag="CODE_SIGN_ENTITLEMENTS=''"
+        # --buildFlag="CODE_SIGNING_REQUIRED=NO"
+        # --buildFlag="CODE_SIGNING_ALLOWED=NO"
+        # --automaticProvisioning=true
+
+    - name: List result
+      run: >
+        find dist ;
+        find . -name '*.xcarchive' ;
+        find . -name '*.ipa'
+
+      # - name: create cordova ios tar package
+      #   run: tar -czf src-cordova-ios.tar.gz /app/src-cordova/*
+
+      # - name: upload cordova package
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: src-cordova-ios
+      #     path: src-cordova-ios.tar.gz
+
+
+      # iOS-build:
+      #   runs-on: macos-latest
+      #   needs: setup
+      #   steps:
+      #     - name: download cordova package
+      #       uses: actions/download-artifact@v3
+      #       with:
+      #         name: src-cordova-ios
+      #         path: src-cordova.ios.tar.gz
+      #     - name: unpack cordova package
+      #       run: tar -zxf src-cordova-ios.tar.gz
+
+      #     - name: Sparkfabrik
+      #       uses: sparkfabrik/ios-build-action@v2.3.0
+      #       with:
+      #           configuration: Release
+      #           export-method: package
+      #           workspace-path: ${{ secrets.WORKSPACE_PATH }}
+      #           project-path: ${{ secrets.PROJECT_PATH }}
+      #           output-path: build-${{ github.sha }}.ipa
+      #           team-id: quasar1
+      #           team-name: Sletteng
+      #           ios-app-id: org.sletteng.quasar1
