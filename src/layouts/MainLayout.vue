@@ -12,10 +12,10 @@
         />
 
         <q-toolbar-title>
-          Catalog Scanner
+          {{ appinfo.productName }}
         </q-toolbar-title>
 
-        <div>Quasar v{{ $q.version }}</div>
+        <div>v{{ appinfo.version }}</div>
       </q-toolbar>
     </q-header>
 
@@ -57,7 +57,6 @@ import { defineComponent, ref } from 'vue'
 import EssentialLink from 'components/EssentialLink.vue'
 import InternalLink from 'components/InternalLink.vue'
 
-
 const pageList = [
   {
     title: 'Main',
@@ -78,7 +77,15 @@ const linksList = [
 
 export default defineComponent({
   name: 'MainLayout',
+  data () {
+            // https://quasar.dev/quasar-cli-webpack/handling-process-env#caveats
+                    // console.log(process.env.TEST)
+  return {
+                appinfo: process.env.appinfo,
 
+  }
+
+  },
   components: {
     EssentialLink,
     InternalLink
