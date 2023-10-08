@@ -1,0 +1,10 @@
+{
+  "appId": "org.sletteng.app.quasar1",
+  "appName": "Catalog Scanner",
+  "bundledWebRuntime": false,
+  "npmClient": "pnpm",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}

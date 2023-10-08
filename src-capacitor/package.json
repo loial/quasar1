@@ -1,0 +1,12 @@
+{
+  "name": "quasar1",
+  "version": "0.0.2",
+  "description": "A Quasar Project",
+  "author": "Herman Sletteng <herman@sletteng.org>",
+  "private": true,
+  "dependencies": {
+    "@capacitor/app": "^5.0.0",
+    "@capacitor/cli": "^5.0.0",
+    "@capacitor/core": "^5.0.0"
+  }
+}
